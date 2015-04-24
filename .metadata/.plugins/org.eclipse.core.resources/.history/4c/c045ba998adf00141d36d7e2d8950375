@@ -1,0 +1,14 @@
+package Main;
+
+public class Main{
+	
+	public static String teacherID;
+	public static final String ftpIP = "us1.hostedftp.com:21";
+	
+	public static void main(String args[]){
+		System.out.println("Program Began Execution");
+		testCreator.init();
+		teacherID = null;
+		ScreenManage.createHomeScreen();
+	}
+}

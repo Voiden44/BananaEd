@@ -1,0 +1,117 @@
+package Main;
+
+import Graphic.ObjectManager;
+import Graphic.Window;
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+import javax.swing.*;
+
+public class ScreenManage {
+	
+	public static Window homewindow;
+	
+	public static void createHomeScreen(){
+		homewindow = new Window("Banana");
+		
+		homewindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		homewindow.setBkgImage(new File(System.getProperty("user.dir") + "\\bin\\Graphic\\Res\\template.png"), 1000, 600);
+	
+		//homewindow.addButton(400, 250, 100, 200, 2, "Use Class ID", new GetTeacherCode());
+		
+		//System.out.println(homewindow.askMCQuestion("Test", "Right", "Wrong", "Wrong", "Wrong", 1));
+		
+		loadTest(FileSystems.getDefault().getPath("bin", "testTest.txt"));
+	}
+	
+	public static void createLoggedIn(){
+		ObjectManager.clearScreen(homewindow.getWindowLayeredPane(), homewindow);
+	
+		
+	}
+	
+	public static void loadTest(Path testFile){
+		ObjectManager.clearScreen(homewindow.getWindowLayeredPane(), homewindow);
+		InputStream instream;
+		InputStream instream1;
+		BufferedReader br;
+		BufferedReader br1;
+		Scanner sc;
+		ArrayList<String> testQuestions = new ArrayList<String>();
+		int questionCount = 0;
+		int correct = 0;
+		int answered = 0;
+		int titleLength;
+		String currentQTitle = "", currentQA1, currentQA2, currentQA3, currentQA4, currentQA, currentType;
+		
+		try {
+			instream = Files.newInputStream(testFile);
+			br = new BufferedReader(new InputStreamReader(instream));
+			while(br.readLine() != null){
+				questionCount++;
+			}
+			br.close();
+			instream1 = Files.newInputStream(testFile);
+			br1 = new BufferedReader(new InputStreamReader(instream1));
+			for(int i = 0; i <= questionCount; i++){
+				testQuestions.add(br1.readLine());
+			}
+			/*
+			 * -----------------------------------------
+			 * TEST CFG LINE FORMAT FOR MULTIPLE CHOICE
+			 * -----------------------------------------
+			 * 1. Question Type
+			 * 2. Title Length
+			 * 3. Question Title
+			 * 4. Answer One
+			 * 5. Answer Two
+			 * 6. Answer Three
+			 * 7. Answer Four
+			 * 8. Correct Answer
+			 * -----------------------------------------
+			 * TEST CFG LINE FORMAT FOR TRUE FALSE
+			 * -----------------------------------------
+			 * 1. Question Type
+			 * 2. Title Length
+			 * 3. Question Title
+			 * 4. Correct Answer
+			 * -----------------------------------------
+			 */
+			for(String j: testQuestions){
+				sc = new Scanner(j);
+				currentType = sc.next();
+				titleLength = Integer.parseInt(sc.next());
+				for(int k = 0; k < titleLength; k++){
+					currentQTitle = currentQTitle + sc.next();
+				}
+				if(currentType.equals("mc")){
+					currentQA1 = sc.next();
+					currentQA2 = sc.next();
+					currentQA3 = sc.next();
+					currentQA4 = sc.next();
+					currentQA = sc.next();
+					if(homewindow.askMCQuestion(currentQTitle, currentQA1, currentQA2, currentQA3, currentQA4, Integer.parseInt(currentQA)) == true){
+						correct++;
+						answered++;
+					}else{
+						answered++;
+					}
+				}else if(currentType.equals("tf")){
+					currentQA = sc.next();
+					if(homewindow.askTFQuestion(currentQTitle, Integer.parseInt(currentQA)) == true){
+						correct++;
+						answered++;
+					}else{
+						answered++;
+					}
+				}
+			}
+			
+			System.out.println("Grade: " + (correct/answered));
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}

@@ -1,0 +1,163 @@
+/**
+ * @author EH
+ * @version 1.0
+ */
+package Graphic;
+
+import javax.imageio.ImageIO;
+import javax.media.*;
+import javax.swing.*;
+
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.image.*;
+import java.io.*;
+import java.net.URL;
+
+public class Window extends JFrame{
+
+	private static final long serialVersionUID = 6417992463021165919L;
+	private JLayeredPane layeredPane;
+	
+	/**
+	 * 
+	 * @param title Name of The Window
+	 */
+	public Window(String title){
+		setTitle(title);
+		
+		pack();
+		
+		setSize(400, 400);
+		
+		setVisible(true);
+		
+		setResizable(false);
+		
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		layeredPane = new JLayeredPane();
+		
+		layeredPane.setPreferredSize(new Dimension(1000, 600));
+		
+		add(layeredPane);
+	}
+	
+	/**
+	 * 
+	 * @param file File Initialized with Image
+	 * @param Height Height to Size Image and Frame to
+	 * @param Width Width to Size Image and Frame to
+	 */
+	public void setBkgImage(File file, int Width, int Height){
+		
+		System.out.println(file.toString());
+		
+		if (file.exists()){
+			try {
+				BufferedImage img = ImageIO.read(file);
+				Image img2 = img.getScaledInstance(Width, Height, Image.SCALE_SMOOTH);
+				JLabel lbl = new JLabel(new ImageIcon(img2));
+				layeredPane.setSize(getWidth(), getHeight());
+				layeredPane.add(lbl);
+				setSize(Width - 1, Height - 1);
+				setSize(Width, Height);
+				System.out.println("File Found! Background Should be Set");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else{
+			System.out.println("File Doesn't Exist!");
+		}
+	}
+	
+	/**
+	 * 
+	 * @param x X Value of Component
+	 * @param y Y Value of Component
+	 * @param height Height of Text Box
+	 * @param width Width of Text Box
+	 * @param depth Depth of Text Box
+	 * @param defText Default Text of Text Box
+	 */
+	public JTextField addTxtBox(int x, int y, int height, int width, int depth, String defText){
+		JTextField txt = new JTextField(defText);
+		layeredPane.add(txt, depth);
+		txt.setLayout(null);
+		txt.setBounds(x, y, height, width);
+		txt.repaint(x, y, width, height);
+		return txt;
+	}
+	
+	/**
+	 * 
+	 * @param vidURL URL of Video
+	 */
+	public Player showVideo(URL vidURL, int depth){
+		try {
+			Player mediaPlayer = Manager.createRealizedPlayer(vidURL);
+			
+			Component video = mediaPlayer.getVisualComponent();
+			Component controls = mediaPlayer.getControlPanelComponent();
+			
+			if (video != null){
+				layeredPane.add(video, depth);
+			}
+			
+			if (controls != null){
+				layeredPane.add(controls, depth);
+			}
+			
+			mediaPlayer.start();
+		
+			return mediaPlayer;
+			
+		} catch (NoPlayerException | CannotRealizeException | IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * 
+	 * @param x X
+	 * @param y Y
+	 * @param height Height of Button
+	 * @param width Width of Button
+	 * @param depth Depth of Button
+	 * @param text Button Text
+	 * @param listener Listener Class for Button
+	 * @return Created Button Object
+	 */
+	public JButton addButton(int x, int y, int height, int width, int depth, String text, ActionListener listener){
+		JButton btn = new JButton(text);
+		layeredPane.add(btn, depth);
+		btn.setLayout(null);
+		btn.setBounds(x, y, height, width);
+		btn.repaint(x, y, width, height);
+		btn.addActionListener(listener);
+		return btn;
+	}
+	
+	/**
+	 * 
+	 * @param x X
+	 * @param y Y
+	 * @param height Height of Label
+	 * @param width Width of Label
+	 * @param depth Depth of Label
+	 * @param text Label Text
+	 * @return Created JLabel Object
+	 */
+	public JLabel addLabel(int x, int y, int height, int width, int depth, String text){
+		JLabel lbl = new JLabel(text);
+		
+		lbl.setLayout(null);
+		
+		lbl.setBounds(x, y, height, width);
+		
+		layeredPane.add(lbl, depth);
+		
+		return lbl;
+	}
+}

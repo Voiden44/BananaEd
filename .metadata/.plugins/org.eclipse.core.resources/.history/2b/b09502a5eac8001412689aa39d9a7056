@@ -1,0 +1,334 @@
+/**
+ * @author EH
+ * @version 1.0
+ */
+package Graphic;
+
+import javax.imageio.ImageIO;
+import javax.media.*;
+import javax.swing.*;
+
+import Listeners.ChoiceAPress;
+import Listeners.ChoiceBPress;
+import Listeners.ChoiceCPress;
+import Listeners.ChoiceDPress;
+import Listeners.FalseButtonPress;
+import Listeners.TrueButtonPress;
+
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.image.*;
+import java.io.*;
+import java.net.URL;
+
+public class Window extends JFrame{
+
+	private static final long serialVersionUID = 6417992463021165919L;
+	public final JLayeredPane layeredPane;
+	private int width;
+	private int height;
+	private String lastAnswerPressed;
+	
+	/**
+	 * 
+	 * @param title Name of The Window
+	 */
+	public Window(String title){
+		setTitle(title);
+		
+		pack();
+		
+		setSize(400, 400);
+		
+		width = 400;
+		height = 400;
+		
+		setVisible(true);
+		
+		setResizable(false);
+		
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		
+		layeredPane = new JLayeredPane();
+		
+		layeredPane.setPreferredSize(new Dimension(1000, 600));
+		
+		add(layeredPane);
+	}
+	
+	/**
+	 * 
+	 * @param file File Initialized with Image
+	 * @param Height Height to Size Image and Frame to
+	 * @param Width Width to Size Image and Frame to
+	 */
+	public void setBkgImage(File file, int width, int height){
+		
+		System.out.println(file.toString());
+		
+		if (file.exists()){
+			try {
+				BufferedImage img = ImageIO.read(file);
+				Image img2 = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+				JLabel lbl = new JLabel(new ImageIcon(img2));
+				setSize(width, height);
+				layeredPane.setSize(getWidth(), getHeight());
+				layeredPane.add(lbl, new Integer(1));
+				lbl.setLayout(null);
+				lbl.setBounds(0, 0, width, height);
+				lbl.repaint(0, 0, width, height);
+				this.width = width;
+				this.height = height;
+				System.out.println("File Found! Background Should be Set");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else{
+			System.out.println("File Doesn't Exist!");
+		}
+	}
+	
+	/**
+	 * 
+	 * @param x X Value of Component
+	 * @param y Y Value of Component
+	 * @param height Height of Text Box
+	 * @param width Width of Text Box
+	 * @param depth Depth of Text Box
+	 * @param defText Default Text of Text Box
+	 */
+	public JTextField addTxtBox(int x, int y, int width, int height, int depth, String defText){
+		JTextField txt = new JTextField(defText);
+		layeredPane.add(txt, new Integer(depth));
+		txt.setLayout(null);
+		txt.setBounds(x, y, height, width);
+		txt.repaint(x, y, height, width);
+		ObjectManager.addObject(txt);
+		return txt;
+	}
+	
+	/**
+	 * 
+	 * @param vidURL URL of Video
+	 */
+	public Component[] showVideo(URL vidURL, int depth){
+		try {
+			Player mediaPlayer = Manager.createRealizedPlayer(vidURL);
+			
+			Component video = mediaPlayer.getVisualComponent();
+			Component controls = mediaPlayer.getControlPanelComponent();
+			
+			if (video != null){
+				layeredPane.add(video, new Integer(depth));
+			}
+			
+			if (controls != null){
+				layeredPane.add(controls, new Integer(depth));
+			}
+			
+			mediaPlayer.start();
+			
+			Component returnArray[] = {video, controls};
+			
+			for(int i = 0; i < returnArray.length; i++){
+				ObjectManager.addObject(returnArray[i]);
+			}
+			
+			return returnArray;
+			
+		} catch (NoPlayerException | CannotRealizeException | IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	/**
+	 * 
+	 * @param x X
+	 * @param y Y
+	 * @param height Height of Button
+	 * @param width Width of Button
+	 * @param depth Depth of Button
+	 * @param text Button Text
+	 * @param listener Listener Class for Button
+	 * @return Created Button Object
+	 */
+	public JButton addButton(int x, int y, int width, int height, int depth, String text, ActionListener listener){
+		JButton btn = new JButton(text);
+		layeredPane.add(btn, new Integer(depth));
+		btn.setLayout(null);
+		btn.setBounds(x, y, height, width);
+		btn.repaint(x, y, height, width);
+		btn.addActionListener(listener);
+		btn.setToolTipText("Button");
+		ObjectManager.addObject(btn);
+		return btn;
+	}
+	
+	/**
+	 * 
+	 * @param x X
+	 * @param y Y
+	 * @param height Height of Label
+	 * @param width Width of Label
+	 * @param depth Depth of Label
+	 * @param text Label Text
+	 * @return Created JLabel Object
+	 */
+	public JLabel addLabel(int x, int y, int width, int height, int depth, String text){
+		JLabel lbl = new JLabel(text);
+		
+		layeredPane.add(lbl, new Integer(depth));
+		
+		lbl.setLayout(null);
+		
+		lbl.setBounds(x, y, height, width);
+		
+		lbl.repaint(x, y, height, width);
+		
+		lbl.setToolTipText("Label");
+		
+		ObjectManager.addObject(lbl);
+		
+		return lbl;
+	}
+	
+	/**
+	 * 
+	 * @param x X
+	 * @param y Y
+	 * @param width Width of List
+	 * @param height Height of List
+	 * @param depth Depth of List
+	 * @param contents Array with Contents of List
+	 * @return Created JList
+	 */
+	public JList<String> addList(int x, int y, int width, int height, int depth, String[] contents){
+		JList<String> list = new JList<String>(contents);
+		
+		layeredPane.add(list, new Integer(depth));
+		
+		list.setLayout(null);
+		
+		list.setBounds(x, y, height, width);
+		
+		list.repaint(x, y, height, width);
+		
+		ObjectManager.addObject(list);
+		
+		return list;
+	}
+	
+	/**
+	 * 
+	 * @param question The Question to Ask
+	 * @param answer 1 = True, 2 = False
+	 * @return Was the Question Created Correctly
+	 */
+	public boolean askTFQuestion(String question, int answer){
+		ObjectManager.clearScreen(layeredPane, this);
+		JLabel templbl = this.addLabel(width / 2 - 50, height / 2 - 150, 200, 300, 3, question);
+		JButton tempbtn1 = this.addButton(width / 2 - 200 , height / 2, 50, 100, 3, "True", new TrueButtonPress());
+		JButton tempbtn2 = this.addButton(width / 2 + 100, height / 2, 50, 100, 3, "False", new FalseButtonPress());
+		
+		do{
+			if(lastAnswerPressed == "true" & answer == 1){
+				lastAnswerPressed = null;
+				layeredPane.remove(templbl);
+				layeredPane.remove(tempbtn1);
+				layeredPane.remove(tempbtn2);
+				this.validate();
+				return true;
+			}
+		}while(lastAnswerPressed == null);
+		lastAnswerPressed = null;
+		layeredPane.remove(templbl);
+		layeredPane.remove(tempbtn1);
+		layeredPane.remove(tempbtn2);
+		this.validate();
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param question The Question to be Asked
+	 * @param c1 The First Choice
+	 * @param c2 The Second Choice
+	 * @param c3 The Third Choice
+	 * @param c4 The Fourth Choice
+	 * @param answer 1 = First Choice, 2 = Second Choice, etc.
+	 * @return Was the Answer Correct
+	 */
+	public boolean askMCQuestion(String question, String c1, String c2, String c3, String c4, int answer){
+		ObjectManager.clearScreen(layeredPane, this);
+		JLabel templbl = this.addLabel(width / 2, height / 2 - 212, 200, 300, 3, question);
+		JButton choiceA = this.addButton(width / 2 - 250, height / 2 - 62, 50, 100, 3, "A. " + c1, new ChoiceAPress());
+		JButton choiceB = this.addButton(width / 2 + 150, height / 2 - 62, 50, 100, 3, "B. " + c2, new ChoiceBPress());
+		JButton choiceC = this.addButton(width / 2 - 250, height / 2 + 63, 50, 100, 3, "C. " + c3, new ChoiceCPress());
+		JButton choiceD = this.addButton(width / 2 + 150, height / 2 + 63, 50, 100, 3, "D. " + c4, new ChoiceDPress());
+		
+		do{
+			if(lastAnswerPressed == "a" & answer == 1){
+				lastAnswerPressed = null;
+				layeredPane.remove(templbl);
+				layeredPane.remove(choiceA);
+				layeredPane.remove(choiceB);
+				layeredPane.remove(choiceC);
+				layeredPane.remove(choiceD);
+				this.validate();
+				return true;
+			} else if(lastAnswerPressed == "b" & answer == 2){
+				lastAnswerPressed = null;
+				layeredPane.remove(templbl);
+				layeredPane.remove(choiceA);
+				layeredPane.remove(choiceB);
+				layeredPane.remove(choiceC);
+				layeredPane.remove(choiceD);
+				this.validate();
+				return true;
+			} else if(lastAnswerPressed == "c" & answer == 3){
+				lastAnswerPressed = null;
+				layeredPane.remove(templbl);
+				layeredPane.remove(choiceA);
+				layeredPane.remove(choiceB);
+				layeredPane.remove(choiceC);
+				layeredPane.remove(choiceD);
+				this.validate();
+				return true;
+			} else if(lastAnswerPressed == "d" & answer == 4){
+				lastAnswerPressed = null;
+				layeredPane.remove(templbl);
+				layeredPane.remove(choiceA);
+				layeredPane.remove(choiceB);
+				layeredPane.remove(choiceC);
+				layeredPane.remove(choiceD);
+				this.validate();
+				return true;
+			}
+		}while(lastAnswerPressed == null);
+		lastAnswerPressed = null;
+		layeredPane.remove(templbl);
+		layeredPane.remove(choiceA);
+		layeredPane.remove(choiceB);
+		layeredPane.remove(choiceC);
+		layeredPane.remove(choiceD);
+		this.validate();
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param answerPressed
+	 */
+	public void answerPressed(String answerPressed){
+		lastAnswerPressed = answerPressed;
+	}
+	
+	/**
+	 * 
+	 * @return Returns the Window's Layered Pane
+	 */
+	public JLayeredPane getWindowLayeredPane(){
+		return layeredPane;
+	}
+}

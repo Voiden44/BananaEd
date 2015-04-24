@@ -1,0 +1,24 @@
+package Listeners;
+
+import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
+
+import it.sauronsoftware.ftp4j.*;
+
+public class GetTeacherCode implements ActionListener{
+
+	public void actionPerformed(ActionEvent arg0) {
+		FTPClient client = new FTPClient();
+		//Setup and add FTP server later
+		try {
+			client.connect("Add Server Later");
+			client.login("testuser", "testpass");
+			client.download("teachercodes.txt", new File(System.getProperty("user.dir") + "\\bin\\teachercodes.txt"));
+			
+		} catch (IllegalStateException | IOException | FTPIllegalReplyException
+				| FTPException | FTPDataTransferException | FTPAbortedException e) {
+			e.printStackTrace();
+		}
+	}
+}

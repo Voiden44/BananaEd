@@ -1,0 +1,136 @@
+package Main;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+
+import Graphic.ObjectManager;
+import Graphic.Window;
+
+
+public class TestDisplayThread implements Runnable{
+
+	private Thread runner;
+	private Window homewindow;
+	private Path testFile;
+	
+	public TestDisplayThread(Window homewindow, Path testFile){
+		runner = new Thread(this, "testDisplayThread");
+		this.homewindow = homewindow;
+		this.testFile = testFile;
+		runner.start();
+	}
+	
+	public void run() {
+		ObjectManager.clearScreen(homewindow.getWindowLayeredPane(), homewindow);
+		ObjectManager.clearScreen(homewindow.getWindowLayeredPane(), homewindow);
+		
+		
+		
+		try {
+			DecimalFormat df = new DecimalFormat("#.##");
+			InputStream instream;
+			//InputStream instream1;
+			InputStream instream2;
+			BufferedReader br;
+			//BufferedReader br1;
+			BufferedReader tr;
+			ArrayList<String> testQuestions = new ArrayList<String>();
+			int questionCount = 0;
+			double correct = 0;
+			double answered = 0;
+			int titleLength;
+			String currentQTitle = "", currentQA1, currentQA2, currentQA3, currentQA4, currentQA, currentType, nextType;
+			
+			df.setRoundingMode(RoundingMode.HALF_UP);
+			
+			instream = Files.newInputStream(testFile);
+			br = new BufferedReader(new InputStreamReader(instream));
+			while(br.readLine() != null){
+				questionCount++;
+			}
+			br.close();
+			//instream1 = Files.newInputStream(testFile);
+			//br1 = new BufferedReader(new InputStreamReader(instream1));
+			//for(int i = 0; i <= questionCount; i++){
+				//testQuestions.add(br1.readLine());
+			//}
+			/*
+			 * -----------------------------------------
+			 * TEST CFG LINE FORMAT FOR MULTIPLE CHOICE
+			 * -----------------------------------------
+			 * 1. Question Type
+			 * 2. Title Length
+			 * 3. Question Title
+			 * 4. Answer One
+			 * 5. Answer Two
+			 * 6. Answer Three
+			 * 7. Answer Four
+			 * 8. Correct Answer
+			 * -----------------------------------------
+			 * TEST CFG LINE FORMAT FOR TRUE FALSE
+			 * -----------------------------------------
+			 * 1. Question Type
+			 * 2. Title Length
+			 * 3. Question Title
+			 * 4. Correct Answer
+			 * -----------------------------------------
+			 */
+			instream = Files.newInputStream(testFile);
+			br = new BufferedReader(new InputStreamReader(instream));
+			System.out.println("Test Question Size: " + questionCount);
+			nextType = br.readLine();
+			do{
+				//System.out.println("Added a question");
+				currentQTitle = "";
+				currentType = nextType;
+				titleLength = Integer.parseInt(br.readLine());
+				for(int k = 0; k < titleLength; k++){
+					currentQTitle = currentQTitle + " " + br.readLine();
+				}
+				if(currentType.equals("mc")){
+					currentQA1 = br.readLine();
+					currentQA2 = br.readLine();
+					currentQA3 = br.readLine();
+					currentQA4 = br.readLine();
+					currentQA = br.readLine();
+					if(homewindow.askMCQuestion(currentQTitle, currentQA1, currentQA2, currentQA3, currentQA4, Integer.parseInt(currentQA)) == true){
+						correct+=1;
+						answered+=1;
+						System.out.println("Right");
+					}else{
+						answered+=1;
+						System.out.println("Wrong");
+					}
+				}else if(currentType.equals("tf")){
+					currentQA = br.readLine();
+					if(homewindow.askTFQuestion(currentQTitle, Integer.parseInt(currentQA)) == true){
+						correct+=1;
+						answered+=1;
+						System.out.println("Right");
+					}else{
+						System.out.println("Wrong");
+						answered+=1;
+					}
+				}
+				nextType = br.readLine();
+				if(nextType == null){
+					System.out.println("nextType == Null");
+				}
+			}while(nextType != null);
+			
+			br.close();
+			testFile.toFile().delete();
+			System.out.println("Grade: " + df.format((correct/answered) * 100) + "%");
+
+			ScreenManage.showGrade(correct/answered);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
